@@ -11,7 +11,7 @@ A lightweight and scalable Point of Sale (POS) system built with **ASP.NET Core*
 | ASP.NET Core 8     | Backend framework for building APIs              |
 | MySQL             | Relational database for data persistence         |
 | RabbitMQ          | Messaging broker for async processing (e.g., stock updates) |
-| Redis             | caching service for performance                  |
+| Redis             | Caching service for performance                  |
 | Docker            | Containerization for consistent environments     |
 | Serilog           | Structured logging to file or external sinks     |
 | Clean Architecture| Maintainable, testable, and scalable project     |
