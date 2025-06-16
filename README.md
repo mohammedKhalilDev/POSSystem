@@ -1,4 +1,4 @@
-# 🧾 Small POS System (Point of Sale)
+# 🧾 Minimal POS System (Point of Sale)
 
 A lightweight and scalable Point of Sale (POS) system built with **ASP.NET Core**, following **Clean Architecture** principles. The solution leverages **RabbitMQ**, **Redis**, **Docker**, **MySQL**, **Serilog**, and a **Generic Repository Pattern** for extensibility and maintainability.
 
