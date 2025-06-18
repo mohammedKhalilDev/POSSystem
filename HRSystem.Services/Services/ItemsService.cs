@@ -164,6 +164,7 @@ namespace POSSystem.Services.Services
 
             item.Quantity -= quantity;
             _repo.Update(item);
+            _repo.SaveChangesAsync();
 
         }
     }

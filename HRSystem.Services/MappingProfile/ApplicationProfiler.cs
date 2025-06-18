@@ -16,6 +16,20 @@ namespace POSSystem.Services.MappingProfile
             CreateMap<Item, GetItemDto>().ForMember(dest => dest.CategoryName,
                 opt => opt.MapFrom(src => src.Category.Name));
 
+            CreateMap<InvoiceDetailedDto, Invoice>().ReverseMap();
+            CreateMap<InvoiceCreateDto, Invoice>().ForMember(dest => dest.InvoiceDetails,
+                opt => opt.MapFrom(src => src.Items));
+
+            CreateMap<InvoiceUpdateDto, Invoice>();
+            CreateMap<Invoice, InvoiceListDto>();
+            CreateMap<InvoiceDetailCreateDto, InvoiceDetail>();
+            CreateMap<InvoiceDetailUpdateDto, InvoiceDetail>();
+            CreateMap<InvoiceDetail, InvoiceDetailItemDto>()
+                .ForMember(dest => dest.ItemName,
+                opt => opt.MapFrom(src => src.Item.Name));
+
+
+
         }
     }
 }

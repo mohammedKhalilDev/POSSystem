@@ -172,38 +172,5 @@ namespace POSSystem.UI.Controllers
             }
         }
 
-        /// <summary>
-        /// Calculate invoice total without saving
-        /// </summary>
-        /// <param name="items">List of invoice items</param>
-        /// <returns>Calculated total</returns>
-        [HttpPost("calculate-total")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(decimal))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CalculateTotal([FromBody] IEnumerable<InvoiceDetailCreateDto> items)
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Invalid model state for total calculation");
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var total = await _invoiceService.CalculateInvoiceTotal(items);
-                return Ok(total);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Item not found during total calculation");
-                return BadRequest("One or more items not found");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error calculating invoice total");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error calculating total");
-            }
-        }
     }
 }

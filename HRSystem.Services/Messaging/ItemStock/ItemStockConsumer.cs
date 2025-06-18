@@ -34,36 +34,58 @@ namespace POSSystem.Services.Messaging.Enventory
             _serviceProvider = serviceProvider;
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var connection = await _factory.CreateConnectionAsync();
-            using var channel = await connection.CreateChannelAsync();
-
-            var queue = _configuration.Queues["SaleItemDecreasingQueue"];
-
-            channel.QueueDeclareAsync(queue: queue.Name, durable: queue.Durable, exclusive: queue.Exclusive, autoDelete: queue.AutoDelete, arguments: null);
-
-            var consumer = new AsyncEventingBasicConsumer(channel);
-            consumer.ReceivedAsync += (model, ea) =>
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                var itemSale = JsonSerializer.Deserialize<SaleItemMessage>(message);
-
-
-                using (var scope = _serviceProvider.CreateScope())
+                try
                 {
-                    var itemsService = scope.ServiceProvider.GetRequiredService<IItemsService>();
+                    using var connection = await _factory.CreateConnectionAsync();
+                    using var channel = await connection.CreateChannelAsync();
 
-                    itemsService.DecreaseItemQuantity(itemSale.ItemId, itemSale.QuantitySold).Wait();
+                    var queue = _configuration.Queues["SaleItemDecreasingQueue"];
+
+                    await channel.QueueDeclareAsync(
+                        queue: queue.Name,
+                        durable: queue.Durable,
+                        exclusive: queue.Exclusive,
+                        autoDelete: queue.AutoDelete,
+                        arguments: null);
+
+                    var consumer = new AsyncEventingBasicConsumer(channel);
+                    consumer.ReceivedAsync += async (model, ea) =>
+                    {
+                        try
+                        {
+                            var body = ea.Body.ToArray();
+                            var message = Encoding.UTF8.GetString(body);
+                            var itemSale = JsonSerializer.Deserialize<SaleItemMessage>(message);
+
+                            using (var scope = _serviceProvider.CreateScope())
+                            {
+                                var itemsService = scope.ServiceProvider.GetRequiredService<IItemsService>();
+                                await itemsService.DecreaseItemQuantity(itemSale.ItemId, itemSale.QuantitySold);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error processing message: {ex.Message}");
+                        }
+                    };
+
+                    await channel.BasicConsumeAsync(
+                        queue: queue.Name,
+                        autoAck: true,
+                        consumer: consumer);
+
+                    await Task.Delay(Timeout.Infinite, stoppingToken);
                 }
-
-                return Task.CompletedTask;
-            };
-
-            await channel.BasicConsumeAsync(queue.Name, autoAck: true, consumer: consumer);
-
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Consumer error: {ex.Message}");
+                    await Task.Delay(5000, stoppingToken);
+                }
+            }
         }
-
     }
 }
