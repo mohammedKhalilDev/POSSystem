@@ -19,11 +19,11 @@ namespace POSSystem.Infrastructure.Email
 
         public async Task SendEmail(SendEmailMessage emailContent)
         {
-            //var apiKey = Environment.GetEnvironmentVariable("SENDGRID_API_KEY");
-            //var client = new SendGridClient(apiKey);
-            //var email = await BuildEmail(emailContent);
-            //var msg = MailHelper.CreateSingleEmail(email.From, email.To, email.Subject, email.Body, null);
-            //await client.SendEmailAsync(msg);
+            var apiKey = Environment.GetEnvironmentVariable("**********");
+            var client = new SendGridClient(apiKey);
+            var email = await BuildEmail(emailContent);
+            var msg = MailHelper.CreateSingleEmail(email.From, email.To, email.Subject, email.Body, null);
+            await client.SendEmailAsync(msg);
         }
 
         private async Task<Emailmodel> BuildEmail(SendEmailMessage emailContent)
